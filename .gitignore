@@ -1,0 +1,31 @@
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# VS Code and PyCharm settings
+.vscode/
+.idea/
+
+# Mac system files
+.DS_Store
+
+# Output data
+data/extracted_text/
+data/temp/
+*.log
+_temp/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Project archives and zips
+*.zip
+*.tar.gz
+*.bak

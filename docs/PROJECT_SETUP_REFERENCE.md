@@ -9,7 +9,7 @@ You are helping me manage a modular Python project to convert D&D PDFs into Mark
 
 Please refer to these files to maintain consistency in script updates, syntax rules, flag conventions, and directory structure. I’ll be adding or modifying Python scripts, and I want you to ensure they follow the policies in these documents (especially `PROJECT_SETUP_REFERENCE.md`). Also help me maintain these `.md` files as the project evolves.
 
-
+I have uploaded a backup of my files : session_core_backup.zip . This zip file need to be unzipped now. It has all active files from src/ and docs/ directories, which need to be kept in your memory and updates any version of these files you have in memory already. PLease confirm that you have done this and understand this step.
 
 
 # 🗂️ Folder Layout (relative paths, GitHub-friendly)
@@ -18,18 +18,24 @@ project_root/
 ├── data/
 │   ├── input_pdfs/           # Raw PDFs
 │   └── extracted_text/       # All extracted or processed outputs
-├── docs/                     # README, TODO, examples, project setup notes
+├── docs/                     # PROJECT_OVERVIEW.md, PROJECT_SETUP_REFERENCE.md, TODO.md, VERIFICATION.md, other docs
+├── archive/                  # old .py versions
+│   └── LKG/                  # Last Known Good versions
 └── README.md, requirements.txt
+
+# Extract the accompanying ZIP file with paths
+I have uploaded a backup of my files : session_core_backup.zip . This zip file need to be unzipped now. It has all active files from src/ and docs/ directories, which need to be kept in your memory and updates any version of these files you have in memory already. PLease confirm that you have done this and understand this step.
 
 # 🧰 Script Naming & Versioning
 - All Python files must include:
   - Script name, purpose, version number in a header comment
   - Matching printout to terminal when run
-  - Verbose flag: --verbose for detailed CLI debugging output
   - Default mode: shows a simple progress bar using tqdm
+  - --all flag for choosing all PDFs to process , have a count / summary at end of script when using this flag
+- Verbose flag: --verbose for detailed CLI debugging output (optional)
 
 - Output versioned download files as:
-  - `scriptname_v1.2.3.py` ← for archival/download
+  - `scriptname_v1.2.3.py` ← for initial testing, then  archival in `archive/`
   - `scriptname.py`        ← for active use in `src/`
 
 - Internal calls and relative imports must use the **non-versioned filename**
@@ -51,5 +57,4 @@ python extract_text.py ../data/input_pdfs/myfile.pdf --verbose
 - If no flag is used: show clean progress bar (`tqdm`)
 - All output paths are relative, GitHub-safe
 
-# 🧠 Tip
-Use `README.md`, `TODO.md`, and this file in `/docs` to track structure, expectations, and team workflows.
+

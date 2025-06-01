@@ -1,0 +1,37 @@
+               ┌────────────────────┐
+               │   Raw PDF Input    │
+               └────────┬───────────┘
+                        │
+                        ▼
+         ┌────────────────────────────┐
+         │ extract_text.py            │
+         │ ✔ Extracts flat raw text   │
+         └────────┬───────────────────┘
+                  │
+     ┌────────────┼──────────────────────────────┐
+     │            │                              │
+     ▼            ▼                              ▼
+┌──────────┐  ┌───────────────┐           ┌────────────────────┐
+│ Internal │  │ Visual TOC    │           │ No Structure Found │
+│ Outline? │  │ in Pages 1–5? │           │ (fallback scenario)│
+└────┬─────┘  └──────┬────────┘           └────────────┬───────┘
+     │ Yes          │ Yes                             │
+     ▼              ▼                                 ▼
+┌────────────┐  ┌────────────────────┐      ┌────────────────────────┐
+│ extract_   │  │ parse_visual_toc.py│      │ detect_headings.py     │
+│ outline.py │  │ ✔ Approximate TOC  │      │ (Planned)              │
+│ ✔ Bookmarks│  └────────────────────┘      │ Detect headings by font│
+└────┬───────┘                             │ size, position, etc.   │
+     │                                    └────────────┬─────────────┘
+     ▼                                                 ▼
+ ┌──────────────────────────────┐         ┌─────────────────────────────┐
+ │ convert_to_md.py (Planned)   │◄────────┤ Structured headings detected│
+ │ Builds Markdown using:       │         └─────────────────────────────┘
+ │ - Outline                    │
+ │ - Visual TOC fallback        │
+ │ - Or detected headings       │
+ └────────────┬────────────────┘
+              ▼
+    ┌────────────────────────────┐
+    │ Markdown Output (.md)      │
+    └────────────────────────────┘

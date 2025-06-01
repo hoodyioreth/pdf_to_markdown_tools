@@ -1,3 +1,6 @@
+SCRIPT_VERSION = "1.6.6"
+SCRIPT_PURPOSE = "Extract the internal PDF outline (bookmarks) if available"
+
 
 import sys
 import os
@@ -90,3 +93,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

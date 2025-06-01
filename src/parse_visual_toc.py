@@ -1,4 +1,7 @@
+# SCRIPT_VERSION = "1.3.6"
+# SCRIPT_PURPOSE = "Attempt to extract a visual Table of Contents from the first few pages"
 # parse_visual_toc_v1.3.6.py
+
 import sys
 import fitz
 from pathlib import Path

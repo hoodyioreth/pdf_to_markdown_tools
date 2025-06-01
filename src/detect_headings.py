@@ -4,6 +4,9 @@ Script: detect_headings.py
 Version: 1.0.1
 Purpose: Detect section headings in a PDF by analyzing font sizes and positions
 """
+print("detect_headings - v1.0.1")
+print("Purpose: Detect section headings in a PDF by analyzing font sizes and positions")
+print("Requires: PyMuPDF (install via 'pip install pymupdf')")
 
 import sys
 import fitz  # PyMuPDF
@@ -109,3 +112,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

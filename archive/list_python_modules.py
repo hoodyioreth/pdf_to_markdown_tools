@@ -1,19 +1,19 @@
-# SCRIPT_VERSION = "1.2.2"
-# SCRIPT_PURPOSE = "List Python modules with metadata, multiple versions, and LKG fallback"
-
+#!/usr/bin/env python3
+# SCRIPT_VERSION = "1.2.4"
+# SCRIPT_PURPOSE = "List Python modules, show LKG version from VERIFICATION.md in ../docs/"
 
 import os
 import re
 from pathlib import Path
 
-SCRIPT_VERSION = "1.2.2"
-SCRIPT_PURPOSE = "List Python modules with LKG matching, CLI flags, and version status"
+SCRIPT_VERSION = "1.2.4"
+SCRIPT_PURPOSE = "List Python modules, show LKG version from VERIFICATION.md in ../docs/"
 
 SRC_DIR = Path(__file__).resolve().parent
 PROJECT_ROOT = SRC_DIR.parent
 ARCHIVE_DIR = PROJECT_ROOT / "archive"
 LKG_DIR = ARCHIVE_DIR / "LKG"
-VERIFICATION_FILE = PROJECT_ROOT / "docs" / "VERIFICATION.md"
+VERIF_PATH = PROJECT_ROOT / "docs" / "VERIFICATION.md"
 
 def extract_version_from_script(filepath):
     try:
@@ -47,26 +47,46 @@ def extract_purpose(filepath):
         return "Unknown"
     return "Unknown"
 
-def check_lkg_matches(filename):
-    return any(lkg.name == filename for lkg in LKG_DIR.glob("*.py"))
+def full_base_name(filename):
+    match = re.match(r"(.+)_v\d+\.\d+\.\d+\.py", filename)
+    return match.group(1) if match else Path(filename).stem.replace(".py", "")
+
+def check_lkg_version(base_name):
+    matches = sorted(LKG_DIR.glob(f"{base_name}_v*.py"))
+    if matches:
+        return extract_version_from_script(matches[-1])
+    return "-"
+
+def read_verification_lkg_versions():
+    lookup = {}
+    if VERIF_PATH.exists():
+        with open(VERIF_PATH, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("|") and "Script Name" not in line:
+                    parts = [p.strip() for p in line.strip().strip("|").split("|")]
+                    if len(parts) >= 6:
+                        script_base = parts[0]
+                        file_name = parts[1]
+                        version = parts[2]
+                        lookup[script_base] = version
+    return lookup
 
 def list_modules():
     module_dict = {}
+    verif_lkg = read_verification_lkg_versions()
     for pyfile in sorted(SRC_DIR.glob("*.py")):
-        name_parts = pyfile.stem.split("_v")
-        base = name_parts[0]
+        base = full_base_name(pyfile.name)
         version = extract_version_from_script(pyfile)
         flags = extract_cli_flags(pyfile)
         purpose = extract_purpose(pyfile)
-        is_lkg = check_lkg_matches(pyfile.name)
-        status = "LKG" if is_lkg else "-"
+        lkg_ver = verif_lkg.get(base, check_lkg_version(base))
+
         if base not in module_dict:
             module_dict[base] = []
         module_dict[base].append({
             "file": pyfile.name,
             "version": version,
-            "is_lkg": is_lkg,
-            "status": status,
+            "lkg_version": lkg_ver,
             "flags": flags,
             "purpose": purpose
         })
@@ -78,11 +98,12 @@ def print_table(module_dict):
     print(f"📘 Purpose: {SCRIPT_PURPOSE}")
     print(f"📂 Scanning: {SRC_DIR}\n")
 
-    print(f"{'Module':<25} | {'File':<40} | {'This Ver':<10} | {'LKG':<8} | {'Status':<8} | {'CLI Flags':<25} | Purpose")
-    print("-" * 140)
+    print(f"{'Module':<25} | {'File':<40} | {'This Ver':<10} | {'LKG Ver':<8} | {'CLI Flags':<25} | Purpose")
+    print("-" * 130)
     for module, entries in module_dict.items():
         for i, entry in enumerate(entries):
-            print(f"{module if i==0 else '':<25} | {entry['file']:<40} | {entry['version']:<10} | {'yes' if entry['is_lkg'] else '-':<8} | {entry['status']:<8} | {', '.join(entry['flags']):<25} | {entry['purpose']}")
+            print(f"{module if i == 0 else '':<25} | {entry['file']:<40} | {entry['version']:<10} | {entry['lkg_version']:<8} | {', '.join(entry['flags']) if entry['flags'] else '-':<25} | {entry['purpose']}")
 
-module_data = list_modules()
-print_table(module_data)
+if __name__ == "__main__":
+    module_data = list_modules()
+    print_table(module_data)

@@ -4,6 +4,9 @@ Script: diagnose_structure_sources.py
 Version: 1.0.0
 Purpose: List which structure source (outline, headings, visual) would be used for each PDF
 """
+print("diagnose_structure_sources - v1.0.0")
+print("Purpose: List which structure source (outline, headings, visual) would be used for each PDF")
+print("Requires: PyMuPDF (install via 'pip install pymupdf')")
 
 from pathlib import Path
 import json
@@ -72,3 +75,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

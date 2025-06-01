@@ -1,18 +1,14 @@
-"""
-Script: parse_visual_toc.py
-Version: 1.3.6
-Purpose: Attempt to extract a visual Table of Contents (TOC) from the first few pages of a PDF
-"""
-
-print("🛠 parse_visual_toc.py - v1.3.6")
-print("📘 Purpose: Attempt to extract a visual Table of Contents (TOC) from the first few pages of a PDF")
-print("📦 Requires: PyMuPDF (install via 'pip install pymupdf')")
-print("")
+# SCRIPT_VERSION = "1.3.6"
+# SCRIPT_PURPOSE = "Attempt to extract a visual Table of Contents from the first few pages"
+# parse_visual_toc_v1.3.6.py
 
 import sys
 import fitz
 from pathlib import Path
 
+SCRIPT_NAME = "parse_visual_toc.py"
+SCRIPT_VERSION = "1.3.6"
+SCRIPT_PURPOSE = "Attempt to extract a visual Table of Contents from the first few pages"
 
 INPUT_DIR = Path(__file__).resolve().parent / "../data/input_pdfs"
 OUTPUT_DIR = Path(__file__).resolve().parent / "../data/extracted_text"

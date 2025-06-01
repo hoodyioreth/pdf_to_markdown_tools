@@ -1,5 +1,10 @@
-SCRIPT_VERSION = "1.6.6"
-SCRIPT_PURPOSE = "Extract the internal PDF outline (bookmarks) if available"
+#!/usr/bin/env python3
+"""
+Script: extract_text.py
+Version: 1.6.6
+Purpose: Extract the internal PDF outline (bookmarks) if available
+Supports: --all, --verbose/-v, --help/-h, --version
+"""
 
 
 import sys

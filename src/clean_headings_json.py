@@ -1,9 +1,11 @@
-#!/usr/bin/env python3
 """
 Script: clean_headings_json.py
 Version: 1.0.0
 Purpose: Sanitize headings JSON files to remove malformed entries (e.g. lists like [1, 'Intro', 3])
 """
+print("clean_headings_json - v1.0.0")
+print("Purpose: Sanitize headings JSON files to remove malformed entries (e.g. lists like [1, 'Intro', 3])")
+print("Requires: PyMuPDF (install via 'pip install pymupdf')")
 
 import json
 from pathlib import Path
@@ -63,3 +65,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    

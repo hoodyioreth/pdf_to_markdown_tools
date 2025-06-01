@@ -73,3 +73,33 @@ _Added: 2025-05-31_
 | enrich_with_tags      | v1.0.0           | Inject [Ref:...] and [MapRef:...] tags into Markdown  | Uses keyword map and coordinate database           | ⏳ Pending |
 | add_yaml_metadata     | v1.0.0           | Prepend YAML frontmatter block to .md files           | For indexing and token control                     | ⏳ Pending |
 | extract_images        | v1.0.0           | Detect and optionally export images from PDFs         | Optional Phase 4 extension                         | ⏳ Pending |
+
+
+---
+
+_Last updated automatically during session sync._
+
+## Phase 1
+
+- [x] `convert_to_md.py` – ✅ Completed and validated (v1.0.4 LKG)
+- [ ] `split_sections.py` – ❌ Not found in `src/` — needs implementation
+- [ ] `extract_index.py` – ❌ Not found in `src/` — needs implementation
+
+## Phase 2
+
+- [ ] `Fix malformed headings.json` – To be verified if already partially implemented
+- [ ] `Clean bad structural tags` – Regex-based cleanup needed for structural debris
+- [ ] `Segment .txt into paragraphs` – Text block segmentation pending implementation
+
+## Phase 3
+
+- [ ] `clean_md_output.py` – Post-processing module not yet in `src/`
+- [ ] `Generate valid Markdown tables` – No table generator module found
+
+## Phase 4
+
+- [ ] `tag_entities.py` – Entity/reference tagger missing
+- [ ] `run_pipeline.py` – Batch orchestrator not yet implemented
+- [ ] `config.json` – JSON config system design pending
+- [ ] `GUI wrapper (macOS)` – Optional GUI/Automator wrapper
+- [ ] `Error handling framework` – Needs `--log` support and structured logging

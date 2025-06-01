@@ -1,15 +1,10 @@
 # Script: list_python_modules.py
-# Version: 1.2.4
+# Version: 1.2.2
 # Purpose: List Python modules with version and verification match (simplified)
 
 import os
 import re
 from pathlib import Path
-
-print("🛠 list_python_modules.py - v1.2.4")
-print("📘 Purpose: List Python modules with version and verification match (simplified)")
-print("📦 Requires: None (uses only standard library)")
-print("")
 
 verif_path = Path(__file__).resolve().parent.parent / "docs" / "VERIFICATION.md"
 src_path = Path(__file__).resolve().parent
@@ -37,7 +32,7 @@ def extract_version(file_path):
     return "Unknown"
 
 def list_modules():
-    print("\n📘 list_python_modules.py - v1.2.4")
+    print("\n📘 list_python_modules.py - v1.2.2")
     print("📂 Scanning for Python modules in ./src")
     print("")
 

@@ -5,3 +5,6 @@
 | detect_headings | 1.0.1  | ✅ Last Known Good   | Font size-based heading detection            | 2025-05-30 17:22 |
 | parse_visual_toc| 1.3.6  | ✅ Last Known Good   | Rewritten for robust fallback                | 2025-06-01 08:05 |
 | verify_scripts  | 1.0.1  | ✅ Last Known Good   | Audits script headers and VERIFICATION.md    | 2025-06-01 10:14 |
+| split_sections     | 1.0.0   | ✅ Last Known Good   | Verified with synthetic test input (4-part split) | 2025-06-01 |
+
+| extract_index      | 1.0.0   | ✅ Last Known Good   | Verified on Classic_Guide_to_Greyhawk.txt (13 entries) | 2025-06-01 |

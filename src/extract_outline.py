@@ -1,101 +1,83 @@
+
 #!/usr/bin/env python3
 """
-Script: extract_text.py
-Version: 1.6.6
-Purpose: Extract the internal PDF outline (bookmarks) if available
-Supports: --all, --verbose/-v, --help/-h, --version
+extract_outline.py - v1.0.0
+Purpose: Extract the PDF's outline (bookmarks) and save as outline.json
 """
 
-
-import sys
 import os
 import fitz  # PyMuPDF
+import argparse
 import json
-from pathlib import Path
+from tqdm import tqdm
 
 SCRIPT_NAME = "extract_outline.py"
-SCRIPT_VERSION = "v1.6.6"
-SCRIPT_PURPOSE = "Extract the internal PDF outline (bookmarks) if available"
+VERSION = "v1.0.0"
 
-INPUT_DIR = Path(__file__).parent / "../data/input_pdfs"
-OUTPUT_DIR = Path(__file__).parent / "../data/extracted_text"
+INPUT_DIR = "../data/input_pdfs"
+OUTPUT_DIR = "../data/extracted_text"
 
-def display_menu(pdf_files):
-    print("\nSelect a PDF to process:")
-    for i, file in enumerate(pdf_files, start=1):
-        print(f"[{i}] {file.name}")
-    choice = input("Enter number: ")
-    try:
-        index = int(choice) - 1
-        if 0 <= index < len(pdf_files):
-            return pdf_files[index]
-    except ValueError:
-        pass
-    print("❌ Invalid selection.")
-    sys.exit(1)
+def extract_outline(pdf_path):
+    filename = os.path.splitext(os.path.basename(pdf_path))[0]
+    output_path = os.path.join(OUTPUT_DIR, f"{filename}.outline.json")
 
-def extract_outline(pdf_path, verbose=False):
     doc = fitz.open(pdf_path)
-    outline = doc.get_toc(simple=True)
-    name = pdf_path.stem
-    txt_path = OUTPUT_DIR / f"{name}.outline.txt"
-    json_path = OUTPUT_DIR / f"{name}.outline.json"
+    outline = doc.get_toc(simple=True)  # [ [level, title, page], ... ]
+    doc.close()
 
-    if outline:
-        with open(txt_path, "w", encoding="utf-8") as txt_out:
-            for entry in outline:
-                indent = "  " * (entry[0] - 1)
-                txt_out.write(f"{indent}- {entry[1]} (p. {entry[2]})\n")
-        with open(json_path, "w", encoding="utf-8") as json_out:
-            json.dump(outline, json_out, indent=2)
-        if verbose:
-            print(f"💾 Saved outline TXT to: {txt_path}")
-            print(f"💾 Saved outline JSON to: {json_path}")
-    else:
-        with open(txt_path, "w", encoding="utf-8") as txt_out:
-            txt_out.write("⚠️ No outline extracted.\n")
-        with open(json_path, "w", encoding="utf-8") as json_out:
-            json.dump([], json_out)
-        if verbose:
-            print("⚠️ No outline extracted.")
+    json_ready = [
+        {"level": item[0], "title": item[1], "page": item[2]}
+        for item in outline
+    ]
+
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(json_ready, f, indent=2)
+
+    print(f"✅ Extracted outline: {os.path.basename(output_path)}")
+
+def list_pdfs():
+    files = [f for f in os.listdir(INPUT_DIR) if f.lower().endswith(".pdf")]
+    return sorted(files)
 
 def main():
-    verbose = "--verbose" in sys.argv or "-v" in sys.argv
-    show_version = "--version" in sys.argv
-    show_help = "--help" in sys.argv or "-h" in sys.argv
-    run_all = "--all" in sys.argv
+    print(f"🛠 {SCRIPT_NAME} - {VERSION}")
+    print("📘 Purpose: Extract PDF bookmarks (outline) to .outline.json")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    if show_version:
-        print(f"{SCRIPT_NAME} - {SCRIPT_VERSION}")
-        sys.exit(0)
-    if show_help:
-        print(f"Usage: {SCRIPT_NAME} [--verbose|-v|--version|--help|-h|--all]")
-        sys.exit(0)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file", nargs="?", help="PDF filename to extract outline from")
+    parser.add_argument("--all", action="store_true", help="Extract from all PDFs")
+    parser.add_argument("--version", "-v", action="version", version=VERSION)
 
-    print(f"🛠 {SCRIPT_NAME} - {SCRIPT_VERSION}")
-    print(f"📘 Purpose: {SCRIPT_PURPOSE}")
-    print("📦 Requires: PyMuPDF (install via 'pip install pymupdf')")
-    print(f"📥 Expected input:   {INPUT_DIR.resolve()}")
-    print(f"📤 Expected output:  {OUTPUT_DIR.resolve()}")
+    args = parser.parse_args()
 
-    INPUT_DIR.mkdir(parents=True, exist_ok=True)
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    pdf_files = sorted(INPUT_DIR.glob("*.pdf"))
+    pdfs = list_pdfs()
 
-    if run_all:
-        for file in pdf_files:
-            print(f"📂 Processing {file.name}")
-            extract_outline(file, verbose)
-            print("✅ Outline extraction complete.")
-        return
+    if args.all:
+        for f in tqdm(pdfs, desc="Extracting outlines"):
+            extract_outline(os.path.join(INPUT_DIR, f))
+    elif args.file:
+        target = os.path.join(INPUT_DIR, args.file)
+        if not os.path.exists(target):
+            print("❌ File not found.")
+            return
+        extract_outline(target)
+    else:
+        if not pdfs:
+            print("❌ No PDF files found.")
+            return
 
-    print("\n📥 No file provided.")
-    selected_pdf = display_menu(pdf_files)
-    print(f"📂 Input: {selected_pdf.resolve()}")
-
-    extract_outline(selected_pdf, verbose)
-    print("✅ Outline extraction complete.")
+        print("\n📄 Available PDFs:")
+        for i, f in enumerate(pdfs):
+            print(f"[{i}] {f}")
+        choice = input("Enter number (or 'q' to quit): ").strip()
+        if choice.lower() == "q":
+            return
+        if not choice.isdigit() or int(choice) >= len(pdfs):
+            print("❌ Invalid selection.")
+            return
+        selected = pdfs[int(choice)]
+        extract_outline(os.path.join(INPUT_DIR, selected))
 
 if __name__ == "__main__":
     main()
-    

@@ -1,77 +1,93 @@
 #!/usr/bin/env python3
-"""
-Script: extract_text.py
-Version: 1.6.3
-Purpose: Extract raw text from PDFs using PyMuPDF
-Supports: --all, --verbose/-v, --help/-h, --version
+""" 
+extract_text.py - v1.6.4
+
+Purpose:
+Extract raw text from a PDF using PyMuPDF. Supports both single-file and --all batch mode.
+
+Key Features:
+- Accepts filename as positional argument
+- Supports --all, --help, --version, -v
+- Outputs to ../data/extracted_text/
+
+Dependencies:
+- PyMuPDF
+- tqdm
 """
 
+import argparse
 import fitz  # PyMuPDF
-import sys
 from pathlib import Path
 from tqdm import tqdm
+import sys
 
 SCRIPT_NAME = "extract_text.py"
-SCRIPT_VERSION = "1.6.3"
-SCRIPT_PURPOSE = "Extract raw text from a PDF file using PyMuPDF"
+VERSION = "1.6.4"
+INPUT_DIR = Path("../data/input_pdfs")
+OUTPUT_DIR = Path("../data/extracted_text")
 
-INPUT_DIR = Path(__file__).resolve().parent / "../data/input_pdfs"
-OUTPUT_DIR = Path(__file__).resolve().parent / "../data/extracted_text"
+def extract_text_from_pdf(pdf_path, output_dir):
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / (pdf_path.stem + ".txt")
 
-def extract_text_from_pdf(pdf_path, verbose=False):
-    filename = pdf_path.name
-    if verbose:
-        print(f"🔍 TRACE: Extracting from {filename}")
-    else:
-        print(f"📂 Processing {filename}")
-
-    output_path = OUTPUT_DIR / f"{filename.replace('.pdf', '.txt')}"
     doc = fitz.open(pdf_path)
-    with open(output_path, "w", encoding="utf-8") as f:
-        for page in tqdm(doc, desc="📄 Extracting pages"):
+    with open(output_path, "w", encoding="utf-8") as out:
+        for page in tqdm(doc, desc=f"📄 Extracting {pdf_path.name}", unit="page"):
             text = page.get_text()
-            f.write(text)
-    print("✅ Text extraction complete.")
-
-def get_pdf_list():
-    return sorted([f for f in INPUT_DIR.glob("*.pdf")])
-
-def display_menu(pdf_files):
-    print("📥 No file provided.")
-    print("Select a PDF to process:")
-    for idx, pdf in enumerate(pdf_files, 1):
-        print(f"[{idx}] {pdf.name}")
-    choice = int(input("Enter number: "))
-    return pdf_files[choice - 1]
+            out.write(text)
+            out.write("\n")
+    doc.close()
+    print(f"✅ Saved: {output_path}")
 
 def main():
-    args = sys.argv
-    verbose = "--verbose" in args or "-v" in args
-    all_mode = "--all" in args
+    parser = argparse.ArgumentParser(description="Extract raw text from PDFs")
+    parser.add_argument("filename", nargs="?", help="PDF file to process (from input_pdfs/)")
+    parser.add_argument("--all", action="store_true", help="Process all PDFs in the input folder")
+    parser.add_argument("--version", "-v", action="store_true", help="Show version info and exit")
 
-    if "--help" in args or "-h" in args:
-        print(f"Usage: {SCRIPT_NAME} [--verbose|-v|--version|-h|--all]")
-        return
+    args = parser.parse_args()
 
-    if "--version" in args:
-        print(f"{SCRIPT_NAME} - v{SCRIPT_VERSION}")
-        return
-
-    pdf_files = get_pdf_list()
-
-    if all_mode:
-        for pdf_path in pdf_files:
-            extract_text_from_pdf(pdf_path, verbose)
-        return
-
-    print(f"🛠 {SCRIPT_NAME} - v{SCRIPT_VERSION}")
-    print(f"📘 Purpose: {SCRIPT_PURPOSE}")
+    print(f"🛠 {SCRIPT_NAME} - v{VERSION}")
+    print("📘 Purpose: Extract raw text from a PDF file using PyMuPDF")
     print("📦 Requires: PyMuPDF (install via 'pip install pymupdf')")
     print(f"📥 Expected input:   {INPUT_DIR.resolve()}")
     print(f"📤 Expected output:  {OUTPUT_DIR.resolve()}")
 
-    selected_pdf = display_menu(pdf_files)
-    extract_text_from_pdf(selected_pdf, verbose)
+    if args.version:
+        sys.exit(0)
+
+    if args.all:
+        files = list(INPUT_DIR.glob("*.pdf"))
+        if not files:
+            print("❌ No PDF files found in input folder.")
+            sys.exit(1)
+        for pdf_path in files:
+            extract_text_from_pdf(pdf_path, OUTPUT_DIR)
+        return
+
+    if args.filename:
+        pdf_path = INPUT_DIR / args.filename
+        if not pdf_path.exists():
+            print(f"❌ File not found: {pdf_path}")
+            sys.exit(1)
+        extract_text_from_pdf(pdf_path, OUTPUT_DIR)
+        return
+
+    # Interactive fallback if no args
+    files = list(INPUT_DIR.glob("*.pdf"))
+    if not files:
+        print("❌ No PDF files found in input folder.")
+        return
+
+    print("\n📄 Available PDFs:")
+    for i, file in enumerate(files):
+        print(f"[{i}] {file.name}")
+    choice = input("\nEnter number: ").strip()
+    try:
+        selected = files[int(choice)]
+        extract_text_from_pdf(selected, OUTPUT_DIR)
+    except (ValueError, IndexError):
+        print("❌ Invalid selection.")
 
 if __name__ == "__main__":
     main()

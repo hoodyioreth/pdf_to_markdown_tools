@@ -1,115 +1,101 @@
 #!/usr/bin/env python3
-"""
-Script: detect_headings.py
-Version: 1.0.1
-Purpose: Detect section headings in a PDF by analyzing font sizes and positions
-"""
-print("detect_headings - v1.0.1")
-print("Purpose: Detect section headings in a PDF by analyzing font sizes and positions")
-print("Requires: PyMuPDF (install via 'pip install pymupdf')")
+""" 
+detect_headings.py - v1.0.2
 
-import sys
+Purpose:
+Detect and extract headings from a PDF file based on font size heuristics.
+
+Key Features:
+- Accepts single filename (positional)
+- Supports --all batch processing
+- Fallback to interactive selection
+- Compatible with interactive_pipeline.py
+
+Dependencies:
+- PyMuPDF
+- tqdm
+"""
+
+import argparse
 import fitz  # PyMuPDF
 from pathlib import Path
-import json
 from tqdm import tqdm
+import json
+import sys
 
 SCRIPT_NAME = "detect_headings.py"
-SCRIPT_VERSION = "1.0.1"
-SCRIPT_PURPOSE = "Detect likely section headings based on font size and position"
+VERSION = "1.0.2"
+INPUT_DIR = Path("../data/input_pdfs")
+OUTPUT_DIR = Path("../data/extracted_text")
 
-INPUT_DIR = Path(__file__).resolve().parent / "../data/input_pdfs"
-OUTPUT_DIR = Path(__file__).resolve().parent / "../data/extracted_text"
-
-def detect_headings(pdf_path: Path, verbose=False):
-    output_json = OUTPUT_DIR / (pdf_path.stem + ".headings.json")
-    output_txt = OUTPUT_DIR / (pdf_path.stem + ".headings.txt")
-
+def detect_headings_from_pdf(pdf_path, output_dir):
     doc = fitz.open(pdf_path)
     headings = []
 
-    for page_num in tqdm(range(len(doc)), desc="🔎 Scanning for headings"):
-        page = doc[page_num]
+    for page in tqdm(doc, desc=f"🔎 Scanning {pdf_path.name}", unit="page"):
         blocks = page.get_text("dict")["blocks"]
-        for b in blocks:
-            if "lines" not in b:
-                continue
-            for l in b["lines"]:
-                for s in l["spans"]:
-                    font_size = s["size"]
-                    text = s["text"].strip()
-                    if len(text) > 0 and font_size >= 12 and not text.isupper():
-                        headings.append({
-                            "text": text,
-                            "size": font_size,
-                            "page": page_num + 1
-                        })
+        for block in blocks:
+            for line in block.get("lines", []):
+                for span in line.get("spans", []):
+                    text = span.get("text", "").strip()
+                    size = span.get("size", 0)
+                    if text and len(text) < 100 and size >= 14:  # heuristic
+                        headings.append({"text": text, "size": size})
 
-    if not headings:
-        output_txt.write_text("⚠️ No headings detected.\n")
-        output_json.write_text("[]")
-    else:
-        # Sort by page number and descending font size
-        headings.sort(key=lambda h: (-h["size"], h["page"]))
-        with open(output_json, "w", encoding="utf-8") as f:
-            json.dump(headings, f, indent=2)
-        with open(output_txt, "w", encoding="utf-8") as f:
-            for h in headings:
-                f.write(f"{h['text']} (p. {h['page']}, size {h['size']})\n")
-    if verbose:
-        print(f"💾 Saved: {output_txt} and {output_json}")
-    print("✅ Heading detection complete.")
-
-def get_pdf_list():
-    return sorted(INPUT_DIR.glob("*.pdf"))
-
-def display_menu(pdfs):
-    print("\n📥 No file provided.")
-    print("Select a PDF to process:")
-    for i, pdf in enumerate(pdfs, 1):
-        print(f"[{i}] {pdf.name}")
-    choice = input("Enter number: ")
-    return pdfs[int(choice) - 1]
+    output_path = output_dir / (pdf_path.stem + ".headings.json")
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(headings, f, indent=2)
+    doc.close()
+    print(f"✅ Saved: {output_path}")
 
 def main():
-    verbose = "--verbose" in sys.argv or "-v" in sys.argv
-    show_help = "--help" in sys.argv or "-h" in sys.argv
-    show_version = "--version" in sys.argv
-    run_all = "--all" in sys.argv
+    parser = argparse.ArgumentParser(description="Detect headings from PDF by font size")
+    parser.add_argument("filename", nargs="?", help="PDF file to process (from input_pdfs/)")
+    parser.add_argument("--all", action="store_true", help="Process all PDFs in the input folder")
+    parser.add_argument("--version", "-v", action="store_true", help="Show version info and exit")
 
-    if show_help:
-        print(f"Usage: {SCRIPT_NAME} [--all|--verbose|-v|--version|--help|-h]")
-        return
-    if show_version:
-        print(f"{SCRIPT_NAME} - v{SCRIPT_VERSION}")
-        return
+    args = parser.parse_args()
 
-    print(f"🛠 {SCRIPT_NAME} - v{SCRIPT_VERSION}")
-    print(f"📘 Purpose: {SCRIPT_PURPOSE}")
-    print("📦 Requires: PyMuPDF (install via 'pip install pymupdf')")
+    print(f"🛠 {SCRIPT_NAME} - v{VERSION}")
+    print("📘 Purpose: Detect headings from PDFs using font size heuristics")
     print(f"📥 Expected input:   {INPUT_DIR.resolve()}")
     print(f"📤 Expected output:  {OUTPUT_DIR.resolve()}")
 
-    INPUT_DIR.mkdir(parents=True, exist_ok=True)
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    if args.version:
+        sys.exit(0)
 
-    pdfs = get_pdf_list()
-    if run_all:
-        if not pdfs:
-            print("⚠️ No PDF files found in input directory.")
-            return
-        for pdf in pdfs:
-            print(f"📂 Processing {pdf.name}")
-            detect_headings(pdf, verbose)
+    if args.all:
+        files = list(INPUT_DIR.glob("*.pdf"))
+        if not files:
+            print("❌ No PDF files found in input folder.")
+            sys.exit(1)
+        for pdf_path in files:
+            detect_headings_from_pdf(pdf_path, OUTPUT_DIR)
         return
 
-    if not pdfs:
-        print("❌ No PDFs found in input directory.")
+    if args.filename:
+        pdf_path = INPUT_DIR / args.filename
+        if not pdf_path.exists():
+            print(f"❌ File not found: {pdf_path}")
+            sys.exit(1)
+        detect_headings_from_pdf(pdf_path, OUTPUT_DIR)
         return
 
-    selected = display_menu(pdfs)
-    detect_headings(selected, verbose)
+    # Interactive fallback
+    files = list(INPUT_DIR.glob("*.pdf"))
+    if not files:
+        print("❌ No PDF files found in input folder.")
+        return
+
+    print("\n📄 Available PDFs:")
+    for i, file in enumerate(files):
+        print(f"[{i}] {file.name}")
+    choice = input("\nEnter number: ").strip()
+    try:
+        selected = files[int(choice)]
+        detect_headings_from_pdf(selected, OUTPUT_DIR)
+    except (ValueError, IndexError):
+        print("❌ Invalid selection.")
 
 if __name__ == "__main__":
     main()
-    

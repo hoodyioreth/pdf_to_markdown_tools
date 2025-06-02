@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
 Script: convert_to_md.py
-Version: 2.0.0
+Version: 2.0.2
 Purpose: Convert extracted text and structure metadata into well-formatted Markdown.
 Author: Sean Hood + ChatGPT
 """
+print("convert_to_md - v2.0.2")
+print("Purpose: Convert extracted text and structure metadata into well-formatted Markdown.")
+print("Requires: PyMuPDF (install via 'pip install pymupdf')")
 
 import sys
 import json

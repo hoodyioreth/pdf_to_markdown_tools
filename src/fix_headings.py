@@ -116,6 +116,27 @@ def main():
     if args["show_help"]:
         print_help()
         return
+
+    if not args["run_all"] and not args["target_file"]:
+        json_files = sorted(TEXT_DIR.glob("*.headings.json"))
+        if not json_files:
+            print("❌ No .headings.json files found in extracted_text/")
+            return
+
+        print("\n📄 Available .headings.json files:")
+        for i, file in enumerate(json_files):
+            print(f"[{i}] {file.name}")
+        choice = input("Enter number (or 'q' to quit): ").strip()
+        if choice.lower() == 'q':
+            print("❌ Operation canceled.")
+            return
+
+        try:
+            selected = json_files[int(choice)]
+            validate_and_fix(selected, fix=args["fix"], verbose=args["verbose"])
+        except (ValueError, IndexError):
+            print("❌ Invalid selection.")
+        return
     if args["show_version"]:
         print(f"{SCRIPT_NAME} v{SCRIPT_VERSION}")
         return

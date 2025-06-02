@@ -84,6 +84,7 @@ _Last updated automatically during session sync._
 - [x] `convert_to_md.py` – ✅ Completed and validated (v1.0.4 LKG)
 - [x] `split_sections.py` – ✅ Completed and verified (v1.0.0 LKG)
 - [x] `extract_index.py` – ✅ Completed and verified (v1.0.0 LKG)
+- [x] Build `interactive_pipeline.py` from scratch (v1.0.0) — interactive flow for converting PDF to Markdown - ✅ Verified on 2025-06-02
 
 ## Phase 2
 
@@ -126,3 +127,36 @@ _Last updated automatically during session sync._
 - [ ] `config.json` – JSON config system design pending
 - [ ] `GUI wrapper (macOS)` – Optional GUI/Automator wrapper
 - [ ] `Error handling framework` – Needs `--log` support and structured logging
+
+---
+
+🧭 Pipeline Execution Tools (Added: 2025-06-02)
+Script Name	Phase	Priority	Description
+interactive_pipeline.py	1–4	🔴 High	CLI-based guided flow for one PDF, showing outputs and prompting at each step
+run_pipeline.py	1–4	🟠 Medium	Batch runner that auto-processes all PDFs in data/input_pdfs/ using --all
+
+🔧 interactive_pipeline.py Goals (Priority: Start Now)
+Let user pick a PDF from data/input_pdfs/
+
+Show live progress at each step:
+
+✅ Text extraction
+
+✅ Heading or outline detection
+
+✅ Markdown conversion
+
+🛠 Optionally: index term extraction, reference tagging
+
+Ask before continuing each step, with CLI displays
+
+Useful for debugging pipeline, verifying quality
+
+🔁 run_pipeline.py Goals (For Later)
+Auto-run the best-available version of each core module
+
+Use --all to process all PDFs without interaction
+
+CLI flags: --skip-index, --log, --summary
+
+Output summary table after completion

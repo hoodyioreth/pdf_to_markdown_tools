@@ -56,5 +56,22 @@ python extract_text.py ../data/input_pdfs/myfile.pdf --verbose
 - If `--verbose` is enabled: print detailed logs
 - If no flag is used: show clean progress bar (`tqdm`)
 - All output paths are relative, GitHub-safe
+---
 
+### 🛠️ Standard CLI Behavior (PDF → Markdown Tools)
 
+Each script accepts the following options:
+
+- `--all`  
+  → Automatically process all valid files in the correct data directory (e.g., `../data/converted_md/` or `../data/input_pdfs/`)
+
+- `<filename>`  
+  → Run on a single file. If no path is given, the script will **look in the expected input folder** (e.g., `../data/converted_md/filename.md`)
+
+- _No arguments_  
+  → Launches an interactive **menu picker** that lists valid files in the appropriate folder for you to choose from
+
+- `--help`, `--version`, `-v`  
+  → Standard metadata and usage flags
+
+💡 All scripts are run from the `src/` directory and use **relative paths** to stay GitHub-safe.

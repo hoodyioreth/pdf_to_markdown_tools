@@ -12,3 +12,9 @@
 | interactive_pipeline | 1.0.0     | ✅ Last Known Good | Interactive CLI pipeline that guides the user step-by-step through PDF → text → headings → markdown conversion using extract_text.py, detect_headings.py, and convert_to_md.py | 2025-06-02       |
 | split_sections       | 1.0.0     | ✅ Last Known Good | Verified with synthetic test input (4-part split)                                                                                                                              | 2025-06-01       |
 | extract_index        | 1.0.0     | ✅ Last Known Good | Verified on Classic_Guide_to_Greyhawk.txt (13 entries)                                                                                                                         | 2025-06-01       |
+
+### ✅ clean_md_output.py – Last Known Good (LKG)
+
+- **Version:** v1.0.2
+- **Promoted:** 2025-06-02
+- **Notes:** Fully passed test bench via run_testbench.py; output validated. Handles --all, <filename>, and menu prompt logic. Auto-cleans spacing, lists, and table formatting.

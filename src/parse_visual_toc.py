@@ -1,18 +1,18 @@
 """
 Script: parse_visual_toc.py
-Version: 1.3.6
+Version: 1.3.7
 Purpose: Attempt to extract a visual Table of Contents (TOC) from the first few pages of a PDF
 """
 
-print("🛠 parse_visual_toc.py - v1.3.6")
+print("🛠 parse_visual_toc.py - v1.3.7")
 print("📘 Purpose: Attempt to extract a visual Table of Contents (TOC) from the first few pages of a PDF")
 print("📦 Requires: PyMuPDF (install via 'pip install pymupdf')")
 print("")
 
 import sys
 import fitz
+import argparse
 from pathlib import Path
-
 
 INPUT_DIR = Path(__file__).resolve().parent / "../data/input_pdfs"
 OUTPUT_DIR = Path(__file__).resolve().parent / "../data/extracted_text"
@@ -36,32 +36,46 @@ def extract_visual_toc(pdf_path: Path, verbose=False):
         print(f"📝 Output: {output_path}")
     print("✅ Visual TOC extraction complete.")
 
-def main():
-    verbose = "--verbose" in sys.argv or "-v" in sys.argv
-    if "--help" in sys.argv or "-h" in sys.argv:
-        print(f"Usage: {SCRIPT_NAME} [--verbose|-v|--version|-h|--all]")
-        return
-    if "--version" in sys.argv:
-        print(f"{SCRIPT_NAME} - v{SCRIPT_VERSION}")
-        return
-
-    if "--all" in sys.argv:
-        pdf_files = sorted(INPUT_DIR.glob("*.pdf"))
-        for pdf_path in pdf_files:
-            extract_visual_toc(pdf_path, verbose)
-        return
-
-    print("📥 No file provided.\n")
-    print("Select a PDF to process:")
+def prompt_pdf_selection():
     pdfs = sorted(INPUT_DIR.glob("*.pdf"))
+    if not pdfs:
+        print("⚠️ No PDFs found in input directory.")
+        return None
+    print("Select a PDF to process:")
     for i, pdf in enumerate(pdfs, 1):
         print(f"[{i}] {pdf.name}")
-    choice = input("Enter number: ")
-    try:
-        selected = pdfs[int(choice) - 1]
-        extract_visual_toc(selected, verbose)
-    except Exception:
+    choice = input("Enter number: ").strip()
+    if not choice.isdigit() or not (1 <= int(choice) <= len(pdfs)):
         print("❌ Invalid selection.")
+        return None
+    return pdfs[int(choice) - 1]
+
+def main():
+    parser = argparse.ArgumentParser(description="Extract visual TOC from a PDF.")
+    parser.add_argument("file", nargs="?", help="PDF filename (searched in ../data/input_pdfs/ if not a full path)")
+    parser.add_argument("--all", action="store_true", help="Process all PDFs in ../data/input_pdfs/")
+    parser.add_argument("--version", "-v", action="version", version="parse_visual_toc.py v1.3.7")
+    parser.add_argument("--verbose", action="store_true", help="Show verbose output")
+    args = parser.parse_args()
+
+    if args.all:
+        for pdf_path in sorted(INPUT_DIR.glob("*.pdf")):
+            extract_visual_toc(pdf_path, args.verbose)
+        return
+
+    if args.file:
+        path = Path(args.file)
+        if not path.exists():
+            path = INPUT_DIR / args.file
+        if not path.exists():
+            print(f"❌ File not found: {args.file}")
+            return
+        extract_visual_toc(path, args.verbose)
+        return
+
+    selected = prompt_pdf_selection()
+    if selected:
+        extract_visual_toc(selected, args.verbose)
 
 if __name__ == "__main__":
     main()
